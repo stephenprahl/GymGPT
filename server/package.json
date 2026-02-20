@@ -1,0 +1,18 @@
+{
+  "name": "server",
+  "scripts": {
+    "dev": "bun run --hot src/index.ts",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.19.4",
+    "@prisma/client": "^6.16.1",
+    "hono": "^4.12.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "prisma": "^6.16.1"
+  }
+}

@@ -1,0 +1,126 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "sqlite"
+    url      = env("DATABASE_URL")
+}
+
+enum GoalType {
+    STRENGTH
+    HYPERTROPHY
+    ENDURANCE
+    FAT_LOSS
+    GENERAL_FITNESS
+}
+
+enum ExperienceLevel {
+    BEGINNER
+    INTERMEDIATE
+    ADVANCED
+}
+
+enum FeedbackType {
+    FORM
+    MACHINE
+}
+
+model User {
+    id             String          @id @default(cuid())
+    email          String          @unique
+    displayName    String
+    createdAt      DateTime        @default(now())
+    updatedAt      DateTime        @updatedAt
+    plans          WorkoutPlan[]
+    sessions       Session[]
+    feedbackEvents FeedbackEvent[]
+}
+
+model Exercise {
+    id            String   @id @default(cuid())
+    slug          String   @unique
+    name          String
+    primaryMuscle String?
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+    setLogs       SetLog[]
+}
+
+model MachineProfile {
+    id             String          @id @default(cuid())
+    slug           String          @unique
+    name           String
+    setupChecklist String
+    createdAt      DateTime        @default(now())
+    updatedAt      DateTime        @updatedAt
+    feedbackEvents FeedbackEvent[]
+}
+
+model WorkoutPlan {
+    id              String          @id @default(cuid())
+    userId          String
+    title           String
+    goalType        GoalType
+    experienceLevel ExperienceLevel
+    weeks           Int
+    isActive        Boolean         @default(true)
+    createdAt       DateTime        @default(now())
+    updatedAt       DateTime        @updatedAt
+
+    user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+    days WorkoutDay[]
+}
+
+model WorkoutDay {
+    id            String   @id @default(cuid())
+    workoutPlanId String
+    dayOfWeek     Int
+    focus         String
+    notes         String?
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+
+    workoutPlan WorkoutPlan @relation(fields: [workoutPlanId], references: [id], onDelete: Cascade)
+}
+
+model Session {
+    id            String    @id @default(cuid())
+    userId        String
+    workoutPlanId String?
+    startedAt     DateTime  @default(now())
+    endedAt       DateTime?
+    summary       String?
+
+    user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    setLogs SetLog[]
+}
+
+model SetLog {
+    id         String   @id @default(cuid())
+    sessionId  String
+    exerciseId String
+    setNumber  Int
+    reps       Int
+    weightKg   Float?
+    rpe        Float?
+    createdAt  DateTime @default(now())
+
+    session  Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+    exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Restrict)
+}
+
+model FeedbackEvent {
+    id               String       @id @default(cuid())
+    userId           String
+    sessionId        String?
+    machineProfileId String?
+    feedbackType     FeedbackType
+    confidence       Float?
+    verdict          String
+    guidance         String
+    createdAt        DateTime     @default(now())
+
+    user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+    machineProfile MachineProfile? @relation(fields: [machineProfileId], references: [id], onDelete: SetNull)
+}
