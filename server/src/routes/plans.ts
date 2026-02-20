@@ -28,10 +28,21 @@ plansRouter.post('/generate', async (c) => {
             goal: payload.goal,
             experience: payload.experience,
             daysPerWeek: payload.daysPerWeek,
+            weeks: payload.weeks,
             equipment: payload.equipment,
             notes: payload.notes,
         }),
     )
+
+    await prisma.user.upsert({
+        where: { id: payload.userId },
+        update: {},
+        create: {
+            id: payload.userId,
+            email: `${payload.userId}@gymgpt.local`,
+            displayName: 'Gymgpt User',
+        },
+    })
 
     const plan = await prisma.workoutPlan.create({
         data: {
@@ -54,6 +65,8 @@ plansRouter.post('/:id/revise', async (c) => {
     const payload = await c.req
         .json<{
             notes: string
+            daysPerWeek?: number
+            equipment?: string
         }>()
         .catch(() => null)
 
@@ -73,8 +86,9 @@ plansRouter.post('/:id/revise', async (c) => {
         buildPlanPrompt({
             goal: plan.goalType,
             experience: plan.experienceLevel,
-            daysPerWeek: 4,
-            equipment: 'mixed gym equipment',
+            daysPerWeek: payload.daysPerWeek ?? 4,
+            weeks: plan.weeks,
+            equipment: payload.equipment ?? 'mixed gym equipment',
             notes: payload.notes,
         }),
     )
