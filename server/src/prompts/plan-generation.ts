@@ -2,6 +2,7 @@ type PlanPromptInput = {
     goal: string
     experience: string
     daysPerWeek: number
+    weeks: number
     equipment: string
     notes?: string
 }
@@ -15,7 +16,7 @@ export const buildPlanPrompt = (input: PlanPromptInput) => {
         },
         {
             role: 'user' as const,
-            content: `Create a ${input.daysPerWeek}-day weekly workout plan.\nGoal: ${input.goal}\nExperience: ${input.experience}\nEquipment: ${input.equipment}\nNotes: ${input.notes ?? 'none'}\n\nReturn concise markdown with:\n- weekly split\n- exercises with sets/reps\n- progression guidance\n- deload recommendation`,
+            content: `Create a ${input.weeks}-week workout plan with ${input.daysPerWeek} training days per week.\nGoal: ${input.goal}\nExperience: ${input.experience}\nEquipment: ${input.equipment}\nNotes: ${input.notes ?? 'none'}\n\nReturn concise markdown with:\n- weekly split\n- exercises with sets/reps\n- progression guidance\n- deload recommendation`,
         },
     ]
 }
